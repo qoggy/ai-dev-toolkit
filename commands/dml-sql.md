@@ -1,10 +1,20 @@
 ---
-description: 数据库DML规范。当编写DML SQL时使用。
+description: 当编写DML SQL
 ---
+
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+你**必须**在处理之前先查看用户输入（如果非空）。
+
+## Core Task
 
 请严格遵循以下规则和模板编写 SQL 语句
 
-## 详细规则
+## Important Constraints
 
 ### 表级规范
 
@@ -26,7 +36,9 @@ description: 数据库DML规范。当编写DML SQL时使用。
 - 唯一索引命名：`uk_字段名`
 - 普通索引命名：`idx_字段名`
 
-## SQL 模板
+## Output Description
+
+### SQL 模板
 ```sql
 CREATE TABLE `xxxx` (
     `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -38,9 +50,7 @@ CREATE TABLE `xxxx` (
 ) DEFAULT CHARACTER SET=utf8mb4 COMMENT='xxxx';
 ```
 
-## 示例
-
-### 创建表
+### 创建表示例
 
 ```sql
 CREATE TABLE `team` (
@@ -58,7 +68,7 @@ CREATE TABLE `team` (
 ) DEFAULT CHARACTER SET=utf8mb4 COMMENT='团队';
 ```
 
-### 修改表
+### 修改表示例
 
 ```sql
 ALTER TABLE `mcp_resource`

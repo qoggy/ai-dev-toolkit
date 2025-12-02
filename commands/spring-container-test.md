@@ -1,16 +1,40 @@
 ---
-description: Spring容器集成测试指南。适用于需要Spring容器和真实Bean的集成测试。测试Bean注册、依赖注入、AOP等Spring特性。
+description: 编写Spring容器集成测试。适用于需要Spring容器和真实Bean的集成测试。测试Bean注册、依赖注入、AOP等Spring特性。
 ---
 
-## 命名规范
+## User Input
 
-### 测试类
+```text
+$ARGUMENTS
+```
+
+你**必须**在处理之前先查看用户输入（如果非空）。
+
+## Core Task
+
+请严格遵循以下规则和模板编写 Spring 容器集成测试
+
+## Execution Steps
+
+1. 读取被测试的类文件，熟悉被测试类的职责和功能
+2. 识别测试文件存放位置
+3. 编写单测代码
+4. 检查单测能否通过编译
+5. 预测运行结果并告诉我
+
+**重要**：你不要运行单元测试，我会替你运行。取而代之的，你需要预测运行结果并告诉我。
+
+## Important Instructions
+
+### 命名规范
+
+#### 测试类
 
 - 类名：`[被测试的类名]Test`
 - 修饰符：包私有（不加 `public`）
 - JavaDoc：简洁，不超过一行
 
-### 测试方法
+#### 测试方法
 
 - 方法名模式：
     - `test[方法名]`：基础测试
@@ -30,7 +54,7 @@ class MyAutoConfigurationTest {
 }
 ```
 
-## 依赖导入
+### 依赖导入
 
 ```java
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -41,11 +65,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 ```
 
-## ApplicationContextRunner
+### ApplicationContextRunner
 
 用于测试 Spring Boot 自动配置和容器行为的轻量级测试工具。
 
-### 基础用法
+#### 基础用法
 
 ```java
 class MyAutoConfigurationTest {
@@ -62,7 +86,7 @@ class MyAutoConfigurationTest {
 }
 ```
 
-### 添加用户配置
+#### 添加用户配置
 
 ```java
 @Test
@@ -77,7 +101,7 @@ void testExtensionRegistration_shouldRegisterAutomatically() {
 }
 ```
 
-## 测试配置类
+### 测试配置类
 
 使用 static 内部类作为测试配置：
 
@@ -96,9 +120,9 @@ static class TestConfiguration {
 }
 ```
 
-## 常见测试场景
+### 常见测试场景
 
-### Bean 注册和依赖注入
+#### Bean 注册和依赖注入
 
 ```java
 @Test
@@ -115,7 +139,7 @@ void testBeanRegistration_shouldRegisterBean() {
 }
 ```
 
-### AOP 代理测试
+#### AOP 代理测试
 
 ```java
 @Test
@@ -131,7 +155,7 @@ void testAopProxy_shouldCreateProxy() {
 }
 ```
 
-### 事务管理测试
+#### 事务管理测试
 
 ```java
 @Configuration
@@ -156,9 +180,9 @@ static class TransactionTestConfiguration {
 }
 ```
 
-## 测试技巧
+### 测试技巧
 
-### 验证 Bean 类型
+#### 验证 Bean 类型
 
 ```java
 TestService service = context.getBean(TestService.class);
@@ -166,7 +190,7 @@ assertTrue(service instanceof ExpectedType);
 assertSame(bean1, bean2); // 验证是同一个实例
 ```
 
-### 调试输出
+#### 调试输出
 
 ```java
 @Test
@@ -180,7 +204,7 @@ void testFeature() {
 }
 ```
 
-### 异常场景测试
+#### 异常场景测试
 
 ```java
 @Test
@@ -192,13 +216,3 @@ void testInvalidConfiguration_shouldFail() {
             });
 }
 ```
-
-## 工作流程
-
-1. 读取被测试的类文件，熟悉被测试类的职责和功能
-2. 识别测试文件存放位置
-3. 编写单测代码
-4. 检查单测能否通过编译
-5. 预测运行结果并告诉我
-
-**重要**：你不要运行单元测试，我会替你运行。取而代之的，你需要预测运行结果并告诉我。
