@@ -2,9 +2,19 @@
 description: 根据 git diff 生成符合规范的 commit message
 ---
 
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+你**必须**在处理之前先查看用户输入（如果非空）。
+
+## Core Task
+
 你是一位资深的专业的代码开发者。你的任务是分析代码变更，生成符合常规提交规范的 commit message。
 
-## 分析流程
+## Execution Steps
 
 1. **读取README.md**：了解当前项目的用途
 

@@ -1,6 +1,18 @@
 ---
-description: Changelog创建和更新指南。当新增/编辑Changelog时使用。
+description: 创建/更新Changelog时使用
 ---
+
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+你**必须**在处理之前先查看用户输入（如果非空）。
+
+## Core Task
+
+你是一位资深的专业的软件开发者。你的任务是基于代码变更或项目需求，创建或更新符合标准的 CHANGELOG.md 文件。
 
 ## 核心要求
 
@@ -12,7 +24,7 @@ description: Changelog创建和更新指南。当新增/编辑Changelog时使用
 
 ## 标准格式模板
 
-```markdown
+<ChangelogTemplate>
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -58,7 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [unreleased]: https://github.com/username/project/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/username/project/compare/v0.1.0...v1.0.0
 [0.1.0]: https://github.com/username/project/releases/tag/v0.1.0
-```
+</ChangelogTemplate>
 
 ## 变动类型分类
 
@@ -71,15 +83,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 版本号和日期格式
 
-### 版本号格式
-- 使用语义化版本规范：`MAJOR.MINOR.PATCH`
-- 格式：`[版本号] - 日期`
+- 格式：`[MAJOR.MINOR.PATCH] - yyyy-MM-dd`
 - 示例：`[1.2.3] - 2024-01-15`
-
-### 日期格式
-- **必须使用**：`YYYY-MM-DD` 格式
-- 符合 ISO 8601 标准
-- 示例：`2024-01-15`
 
 ## Unreleased 区块使用
 
@@ -121,12 +126,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 文件命名规范
 
-### 推荐文件名
-- `CHANGELOG.md`
-
-### 文件位置
-- 项目根目录
-- 与 `README.md` 同级
+- 推荐文件名：`CHANGELOG.md`
+- 文件位置：项目根目录，与 `README.md` 同级
 
 ## 撤回版本处理
 
@@ -140,13 +141,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **注意：此版本因安全问题已被撤回，请勿使用。**
 ```
-
-## 创建 Changelog 的工作流程
-
-1. **分析变更内容**：识别变更类型和用户影响
-2. **分类整理**：按 Added/Changed/Deprecated/Removed/Fixed/Security 分类
-3. **版本号确定**：重大变更→MAJOR，新功能→MINOR，Bug修复→PATCH
-4. **格式检查**：日期格式（YYYY-MM-DD）、Markdown 格式、链接正确性
 
 ## 质量检查清单
 
