@@ -1,5 +1,5 @@
 ---
-description: 当编写DML SQL
+description: 当编写DDL SQL
 ---
 
 ## User Input
