@@ -28,9 +28,3 @@ replay_pid*
 *.iws
 *.iml
 *.ipr
-
-# Cursor
-.cursor/
-
-# Claude Code
-.claude/
