@@ -1,5 +1,7 @@
 ---
+name: changelog
 description: 创建/更新Changelog时使用
+argument-hint: [额外要求]
 ---
 
 ## User Input

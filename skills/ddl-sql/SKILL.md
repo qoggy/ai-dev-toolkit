@@ -1,5 +1,8 @@
 ---
+name: ddl-sql
 description: 当编写DDL SQL
+argument-hint: <表结构描述>
+disable-model-invocation: true
 ---
 
 ## User Input

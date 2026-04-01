@@ -1,5 +1,7 @@
 ---
+name: translate
 description: 翻译文件
+disable-model-invocation: true
 ---
 
 ## User Input

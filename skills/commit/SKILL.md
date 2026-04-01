@@ -1,5 +1,8 @@
 ---
+name: commit
 description: 根据 git diff 生成符合规范的 commit message
+argument-hint: [额外要求]
+disable-model-invocation: true
 ---
 
 ## User Input

@@ -1,39 +1,8 @@
----
-description: 编写单元测试
-argument-hint: <测试目标>
----
+## 目录结构
 
-## User Input
+通常，测试文件放在项目根目录的 `test/` 下，与 `src/` 平级。
 
-```text
-$ARGUMENTS
-```
-
-你**必须**在处理之前先查看用户输入（如果非空）。
-
-## Core Task
-
-你任务是编写单元测试，
-
-1. **理解测试目标**
-    - 如果用户没有提供测试目标，则询问用户
-    - 明确用户想要验证什么场景
-
-2. **收集信息**
-    - 阅读相关代码，理解目标代码的运行机制
-
-3. **编写单测**
-    - 严格遵循规范进行编码
-    - 添加必要的中文注释
-    - 如果用户频繁拒绝代码，则必须停止编写代码并回到步骤一，简要阐述实现方案并寻求用户同意
-
-## Important Constraints
-
-### 目录结构
-
-测试文件放在项目根目录的 `test/` 下，与 `src/` 平级。
-
-### 环境与依赖
+## 环境与依赖
 
 测试使用 **pytest** 框架。
 
@@ -47,14 +16,14 @@ $ARGUMENTS
 | `pytest-xdist` | 并行运行（`-n auto`） |
 | `pytest-cov` | 覆盖率报告 |
 
-### 命名规范
+## 命名规范
 
-#### 测试文件
+### 测试文件
 
 - 格式：`test_[被测模块名].py`
 - 示例：`src/my-utils/errors.py` → `test/test_errors.py`
 
-#### 测试函数
+### 测试函数
 
 | 场景 | 格式 | 示例 |
 |---|---|---|
@@ -64,7 +33,7 @@ $ARGUMENTS
 
 命名使用全小写 + 下划线，清晰描述测试意图。
 
-#### 测试类（可选）
+### 测试类（可选）
 
 当一个被测类的方法较多时，可用测试类分组：
 
@@ -80,7 +49,7 @@ class TestExceptionUtils:
         ...
 ```
 
-### 类型标注
+## 类型标注
 
 测试函数返回值统一标注为 `-> None`，参数使用具体类型：
 
@@ -92,7 +61,7 @@ def test_with_fixture(tmp_path: Path) -> None:
     ...
 ```
 
-### 导入规范
+## 导入规范
 
 ```python
 import pytest
@@ -101,7 +70,7 @@ import pytest
 from my_utils.errors import ExceptionUtils
 ```
 
-### 测试覆盖场景
+## 测试覆盖场景
 
 每个功能应覆盖以下场景：
 
@@ -129,9 +98,9 @@ from my_utils.errors import ExceptionUtils
 - 循环引用
 - 并发情况（如适用）
 
-### 测试结构
+## 测试结构
 
-#### 基础测试
+### 基础测试
 
 ```python
 def test_get_root_cause_message() -> None:
@@ -141,7 +110,7 @@ def test_get_root_cause_message() -> None:
     assert result == "something went wrong"
 ```
 
-#### 调试输出
+### 调试输出
 
 使用 `print()` 输出中间结果便于调试（pytest 默认捕获，失败时自动展示）：
 
@@ -157,7 +126,7 @@ def test_get_root_causes_with_chained() -> None:
     assert result[0] is inner
 ```
 
-#### 异常断言
+### 异常断言
 
 使用 `pytest.raises` 断言预期异常：
 
@@ -168,7 +137,7 @@ def test_parse_invalid_json() -> None:
     print(f"exception: {exc_info.value}")  # 调试输出，确认异常内容符合预期
 ```
 
-#### 辅助方法
+### 辅助方法
 
 提取重复的构建逻辑为私有辅助函数：
 
@@ -183,7 +152,7 @@ def test_get_root_causes_from_group() -> None:
     assert len(result) == 2
 ```
 
-#### 内部数据类
+### 内部数据类
 
 使用内部 dataclass 或普通类作为测试数据载体：
 
@@ -201,7 +170,7 @@ def test_parse_to_dataclass() -> None:
     assert result.age == 30
 ```
 
-### 异步测试
+## 异步测试
 
 项目已配置 `asyncio_mode = "auto"`，直接使用 `async def` 即可，无需额外装饰器：
 
