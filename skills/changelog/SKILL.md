@@ -19,28 +19,28 @@ $ARGUMENTS
 ## Execution Steps
 
 1. **了解项目背景**：
-   - 读取 README.md 了解项目用途和核心功能
-   - 查看其他开发文档（如有）了解项目架构和模块划分
+    - 读取 README.md 了解项目用途和核心功能
+    - 查看其他开发文档（如有）了解项目架构和模块划分
 
 2. **确定版本范围**：
-   - 查看 git tags：`git tag --sort=-version:refname`
-   - 确定要比较的版本范围（如最新 tag 到 HEAD，或两个 tag 之间）
+    - 查看 git tags：`git tag --sort=-version:refname`
+    - 确定要比较的版本范围（如最新 tag 到 HEAD，或两个 tag 之间）
 
 3. **获取代码变更**：
-   - 使用 `git diff <tag1>..<tag2>` 或 `git diff <last-tag>..HEAD` 查看文件变更
-   - 使用 `git log <tag1>..<tag2> --oneline` 查看提交历史作为参考
+    - 使用 `git diff <tag1>..<tag2>` 或 `git diff <last-tag>..HEAD` 查看文件变更
+    - 使用 `git log <tag1>..<tag2> --oneline` 查看提交历史作为参考
 
 4. **分析变更内容**：
-   - 识别变更的功能模块和影响范围
-   - 判断变更类型：Added/Changed/Deprecated/Removed/Fixed/Security
-   - 提取用户关心的功能变化，忽略技术实现细节
+    - 识别变更的功能模块和影响范围
+    - 判断变更类型：Added/Changed/Deprecated/Removed/Fixed/Security
+    - 提取用户关心的功能变化，忽略技术实现细节
 
 5. **编写或更新 CHANGELOG.md**：
-   - 如果文件不存在，使用模板创建
-   - 确定新版本号（根据语义化版本规范和变更类型）
-   - 将分析的变更内容按类型分类写入新版本区块
-   - 添加版本号和当前日期
-   - 更新底部的版本比较链接
+    - 如果文件不存在，使用模板创建
+    - 确定新版本号（根据语义化版本规范和变更类型）
+    - 将分析的变更内容按类型分类写入新版本区块
+    - 添加版本号和当前日期
+    - 更新底部的版本比较链接
 
 ## Important Instructions
 
@@ -56,6 +56,7 @@ $ARGUMENTS
 ### 常见错误和避免方法
 
 #### ❌ 错误做法：包含过多技术细节
+
 ```markdown
 ## [1.0.2] - 2025-10-07
 
@@ -71,6 +72,7 @@ $ARGUMENTS
 ```
 
 #### ✅ 正确做法：面向用户的描述
+
 ```markdown
 ## [1.0.2] - 2025-10-07
 

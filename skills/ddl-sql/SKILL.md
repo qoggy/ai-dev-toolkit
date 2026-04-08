@@ -42,6 +42,7 @@ $ARGUMENTS
 ## Output Description
 
 ### SQL 模板
+
 ```sql
 CREATE TABLE `xxxx` (
     `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',

@@ -23,6 +23,7 @@ gh auth login
 ```
 
 按提示选择：
+
 - 账户类型：`GitHub.com`
 - 协议：`HTTPS`（推荐）或 `SSH`
 - 认证方式：`Login with a web browser`（最简单）
