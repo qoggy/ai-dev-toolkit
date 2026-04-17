@@ -5,7 +5,7 @@ argument-hint: <描述你想要的 skill>
 disable-model-invocation: true
 ---
 
-# skill-dev
+# skills-dev
 
 本 skill 提供创建有效 skill 的指导。
 
@@ -32,6 +32,18 @@ context window 是公共资源。Skill 与 Claude 所需的一切共享 context 
 **中等自由度（伪代码或带参数的脚本）**：当存在推荐模式、部分变化可接受，或配置会影响行为时使用。
 
 **低自由度（特定脚本，参数极少）**：当操作脆弱且容易出错、一致性至关重要，或必须遵循特定顺序时使用。
+
+### Skills 的位置
+
+存放位置决定作用范围，同名 skill 优先级：个人 > 项目。
+
+| 位置 | 路径 | 适用于 |
+| --- | --- | --- |
+| 个人 | `~/.claude/skills/<skill-name>/SKILL.md` | 所有项目 |
+| 项目 | `.claude/skills/<skill-name>/SKILL.md` | 仅此项目 |
+| 插件 | `<plugin>/skills/<skill-name>/SKILL.md` | 启用插件的位置 |
+
+插件 skills 使用 `plugin-name:skill-name` 命名空间，不与其他级别冲突。
 
 ### Skill 的结构
 
@@ -64,18 +76,17 @@ skill-name/
     - **使用第三人称**描述 skill 的功能和触发场景（description 会注入到 system prompt，视角混乱会导致发现问题）。避免使用"I can..."或"You can use this to..."。
     - 同时包含 skill 的功能说明和具体的触发条件/使用场景。
     - 所有"何时使用"的信息都放在这里——不要放在 body 中。body 只有在触发后才会加载，因此 body 中的"何时使用本 Skill"章节对 Claude 没有帮助。
-    - `description` 与 `when_to_use` 合计在 skill 列表中截断为 1,536 字符，关键用例应前置。
+    - description 每条目在 skill 列表中截断为 **250 字符**（总预算动态扩展为上下文窗口的 1%，回退 8,000 字符），关键用例应前置。
     - `docx` skill 的示例 description："支持修订追踪、注释、格式保留和文本提取的全面文档创建、编辑和分析工具。处理专业 Word 文档（.docx 文件）时使用：(1) 创建新文档，(2) 修改或编辑内容，(3) 使用修订追踪，(4) 添加注释，或任何其他文档任务"
 
 可选 frontmatter 字段：
 
 - `argument-hint`：自动补全时显示的参数提示，如 `<issue-number>` 或 `[filename] [format]`
-- `disable-model-invocation: true`：禁止 Claude 自动触发此 skill，适合只想用 `/name` 手动调用的工作流
+- `disable-model-invocation: true`：禁止 Claude 自动触发此 skill（描述也不会注入 context），适合只想用 `/name` 手动调用的工作流
 - `user-invocable: false`：从 `/` 菜单中隐藏，适合背景知识类 skill（Claude 自动加载，用户不直接调用）
 - `context: fork`：在 subagent 的分叉 context 中运行，适合需要独立执行的任务
 - `agent`：配合 `context: fork` 指定使用的 subagent 类型
 - `allowed-tools`：此 skill 激活时 Claude 无需额外确认即可使用的工具，空格分隔或 YAML 列表
-- `when_to_use`：补充触发条件，如触发短语、示例请求。内容追加在 skill 列表中的 `description` 之后，共享 1,536 字符上限。
 
 
 #### 打包资源（可选）
