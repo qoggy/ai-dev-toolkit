@@ -1,5 +1,5 @@
 ---
-name: skill-dev
+name: skills-dev
 description: 创建有效 skill 的指导手册。当用户想要创建新 skill（或更新现有 skill）以通过专业知识、工作流程或工具集成来扩展 Claude 能力时，应使用本 skill。
 argument-hint: <描述你想要的 skill>
 disable-model-invocation: true
