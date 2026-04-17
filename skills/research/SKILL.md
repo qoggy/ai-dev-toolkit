@@ -1,6 +1,6 @@
 ---
 name: research
-description: 调研学习模式
+description: 调研学习模式。当用户想了解某个框架/类库/技术方案、探讨技术选型、验证某个技术行为时使用
 argument-hint: <研究问题/目标>
 disable-model-invocation: true
 ---

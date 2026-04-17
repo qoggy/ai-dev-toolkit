@@ -1,6 +1,6 @@
 ---
 name: translate
-description: 翻译文件
+description: 将文档翻译为中文
 disable-model-invocation: true
 ---
 

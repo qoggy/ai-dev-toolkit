@@ -1,6 +1,6 @@
 ---
 name: changelog
-description: 创建/更新Changelog时使用
+description: 当用户要写 changelog、更新版本日志、整理版本变更记录时使用。
 argument-hint: [额外要求]
 ---
 

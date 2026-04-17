@@ -1,6 +1,6 @@
 ---
 name: ddl-sql
-description: 当编写DDL SQL
+description: 编写 MySQL DDL SQL 建表/改表语句
 argument-hint: <表结构描述>
 disable-model-invocation: true
 ---
