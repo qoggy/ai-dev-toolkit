@@ -1,5 +1,5 @@
 ---
-name: humanizer
+name: humanize
 description: |
   识别并去除文本中的 AI 生成痕迹，使文字听起来更自然、更像人类书写。
   当用户请求"去除 AI 味/痕迹"、"humanize 这段文字"、审阅疑似 AI 生成的文本时使用。
@@ -10,7 +10,7 @@ metadata:
   source: 翻译自 blader/humanizer，参考 hardikpandya/stop-slop。https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing
 ---
 
-# Humanizer: 去除 AI 写作痕迹
+# Humanize: 去除 AI 写作痕迹
 
 识别并去除 AI 生成文本的痕迹，使文字听起来更自然、更有人味。
 
