@@ -5,7 +5,7 @@ argument-hint: <描述你想要的 skill>
 disable-model-invocation: true
 ---
 
-# skills-dev
+# Skill Development
 
 本 skill 提供创建有效 skill 的指导。
 
@@ -67,7 +67,7 @@ skill-name/
 - **Frontmatter**（YAML）：包含 `name` 和 `description` 字段。这是 Claude 判断何时触发该 skill 的唯一依据，因此清晰、全面地描述 skill 的功能及使用时机至关重要。
 - **Body**（Markdown）：使用 skill 的说明和指导。只有在 skill 触发后才会加载。
 
-##### Frontmatter
+##### frontmatter
 
 编写包含 `name` 和 `description` 的 YAML frontmatter：
 
@@ -87,7 +87,7 @@ skill-name/
 - `context: fork`：在 subagent 的分叉 context 中运行，适合需要独立执行的任务
 - `agent`：配合 `context: fork` 指定使用的 subagent 类型
 - `allowed-tools`：此 skill 激活时 Claude 无需额外确认即可使用的工具，空格分隔或 YAML 列表
-- 高级字段：用于精细控制模型、执行环境和触发范围，详见 [Frontmatter 完整字段参考](references/frontmatter-reference.md)
+- 高级字段：用于精细控制模型、执行环境和触发范围，详见 [frontmatter 完整字段参考](references/frontmatter-reference.md)
 
 
 #### 打包资源（可选）
@@ -252,7 +252,16 @@ cloud-deploy/
 
 #### 更新 SKILL.md
 
-**MUST：** 始终使用祈使/不定式形式。
+**写作风格（MUST）：** 始终使用祈使/不定式形式，不用第二人称。
+
+```
+Bad Example："你应该先读取配置文件。你需要验证输入。"
+Good Example："先读取配置文件。验证输入后再处理。"
+```
+
+**保持精简：** body 控制在 500 行以内。细节移入 references/，并在 SKILL.md 中明确引用及说明何时读取。
+
+**引用打包资源：** 在 SKILL.md 中列出所有 references/、scripts/、assets/ 文件及其用途，Claude 实例才知道它们存在。
 
 ## 打包 Skill
 
