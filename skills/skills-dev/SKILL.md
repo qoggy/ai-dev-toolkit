@@ -11,7 +11,8 @@ disable-model-invocation: true
 
 ## 关于 Skill
 
-Skill 是模块化、自包含的软件包，通过提供专业知识、工作流程和工具，来扩展 Claude 的能力。可以将其理解为特定领域或任务的"上手指南"——它们将通用型 Claude 转变为配备程序性知识的专业化 agent，而这类知识是任何模型都无法完全掌握的。
+Skill 是模块化、自包含的软件包，通过提供专业知识、工作流程和工具，来扩展 Claude 的能力。
+可以将其理解为特定领域或任务的"上手指南"——它们将通用型 Claude 转变为配备程序性知识的专业化 agent，而这类知识是任何模型都无法完全掌握的。
 
 ## 核心原则
 
@@ -44,6 +45,8 @@ context window 是公共资源。Skill 与 Claude 所需的一切共享 context 
 | 插件 | `<plugin>/skills/<skill-name>/SKILL.md` | 启用插件的位置 |
 
 插件 skills 使用 `plugin-name:skill-name` 命名空间，不与其他级别冲突。
+
+查找 skill 文件时，先在当前 workspace 的 `.claude/skills/` 下寻找，再去 `~/.claude/skills/`。
 
 ### Skill 的结构
 
@@ -143,7 +146,14 @@ Skill 使用三级加载系统来有效管理 context：
 
 #### 渐进式披露模式
 
-将 SKILL.md body 保持在基本内容以内、500 行以下，以最小化 context 膨胀。在接近这个限制时，将内容拆分到单独的文件中。将内容拆分到其他文件时，务必在 SKILL.md 中引用它们，并清楚描述何时读取它们，以确保 skill 的读者知道它们的存在和使用时机。
+将 SKILL.md body 保持在基本内容以内、500 行以下，以最小化 context 膨胀。**但不要为了控制行数而拆分**——长文件比碎片化文件更好，除非内容本身具备可拆分的理由。
+
+**抽取到 references 之前，先确认至少满足一条：**
+- **分支性**：不同场景只需加载其中一部分（如按云服务商、按领域）
+- **低频性**：不是每次调用都需要（如高级功能、边缘情况）
+- **可选性**：核心流程不依赖它也能运行（如详细示例、API 参考）
+
+如果每次调用都需要这些内容，它就属于 SKILL.md，放在 references 里只会增加读取成本。
 
 **核心原则：** 当一个 skill 支持多种变体、框架或选项时，SKILL.md 中只保留核心工作流程和选择指南，将变体特定的细节（模式、示例、配置）移到单独的 reference 文件中。
 
@@ -231,9 +241,10 @@ cloud-deploy/
 1. 读取 SKILL.md 和关联的**全部**打包资源，全面理解当前结构和用途
 2. 运行 `scripts/quick_validate.py <path/to/skill-folder>` 了解当前格式问题，**再做判断**
 3. 确认要改动的位置：description / body / scripts / references / assets
-4. 编辑对应文件（参见下方「编辑指南」）
-5. 如果改动了脚本，实际运行验证无 bug
-6. 再次运行 `scripts/quick_validate.py <path/to/skill-folder>` 确认改动后无新问题
+4. 如果无实质问题，则无需改动，并**详细**说明理由。不要为了"有所产出"而制造改动，更不要为了偷懒而放弃分析。
+5. 编辑对应文件（参见下方「编辑指南」）
+6. 如果改动了脚本，实际运行验证无 bug
+7. 再次运行 `scripts/quick_validate.py <path/to/skill-folder>` 确认改动后无新问题
 
 ## 编辑指南
 
@@ -261,7 +272,7 @@ Bad Example："你应该先读取配置文件。你需要验证输入。"
 Good Example："先读取配置文件。验证输入后再处理。"
 ```
 
-**保持精简：** body 控制在 500 行以内。细节移入 references/，并在 SKILL.md 中明确引用及说明何时读取。
+**保持精简：** body 控制在 500 行以内。但不要为了控制行数而强行拆分——只有当内容具备分支性、低频性或可选性时，才将细节移入 references/，并在 SKILL.md 中明确引用及说明何时读取。
 
 **引用打包资源：** 在 SKILL.md 中列出所有 references/、scripts/、assets/ 文件及其用途，Claude 实例才知道它们存在。
 
