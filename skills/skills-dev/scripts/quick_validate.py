@@ -3,11 +3,12 @@
 Skill 快速验证脚本 - 精简版
 """
 
-import sys
 import os
 import re
+import sys
 import yaml
 from pathlib import Path
+
 
 def validate_skill(skill_path):
     """对 skill 进行基础验证"""
@@ -39,7 +40,12 @@ def validate_skill(skill_path):
         return False, f"frontmatter 中的 YAML 无效：{e}"
 
     # 定义允许的属性
-    ALLOWED_PROPERTIES = {'name', 'description', 'when_to_use', 'license', 'allowed-tools', 'metadata', 'argument-hint', 'disable-model-invocation', 'user-invocable', 'context', 'agent'}
+    ALLOWED_PROPERTIES = {
+        'name', 'description', 'when_to_use', 'license', 'compatibility', 'allowed-tools',
+        'metadata', 'argument-hint', 'disable-model-invocation', 'user-invocable', 'context',
+        'agent', 'model', 'effort', 'hooks', 'paths',
+        'shell', 'version'
+    }
 
     # 检查意外属性（排除 metadata 下的嵌套键）
     unexpected_keys = set(frontmatter.keys()) - ALLOWED_PROPERTIES
@@ -90,11 +96,12 @@ def validate_skill(skill_path):
 
     return True, "Skill 验证通过！"
 
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("用法：python quick_validate.py <skill_directory>")
         sys.exit(1)
-    
+
     valid, message = validate_skill(sys.argv[1])
     print(message)
     sys.exit(0 if valid else 1)

@@ -76,7 +76,7 @@ skill-name/
     - **使用第三人称**描述 skill 的功能和触发场景（description 会注入到 system prompt，视角混乱会导致发现问题）。避免使用"I can..."或"You can use this to..."。
     - 同时包含 skill 的功能说明和具体的触发条件/使用场景。
     - 所有"何时使用"的信息都放在这里——不要放在 body 中。body 只有在触发后才会加载，因此 body 中的"何时使用本 Skill"章节对 Claude 没有帮助。
-    - description 每条目在 skill 列表中截断为 **250 字符**（总预算动态扩展为上下文窗口的 1%，回退 8,000 字符），关键用例应前置。
+    - description 在 skill 列表中会被截断，关键用例应前置。
     - `docx` skill 的示例 description："支持修订追踪、注释、格式保留和文本提取的全面文档创建、编辑和分析工具。处理专业 Word 文档（.docx 文件）时使用：(1) 创建新文档，(2) 修改或编辑内容，(3) 使用修订追踪，(4) 添加注释，或任何其他文档任务"
 
 可选 frontmatter 字段：
@@ -87,6 +87,7 @@ skill-name/
 - `context: fork`：在 subagent 的分叉 context 中运行，适合需要独立执行的任务
 - `agent`：配合 `context: fork` 指定使用的 subagent 类型
 - `allowed-tools`：此 skill 激活时 Claude 无需额外确认即可使用的工具，空格分隔或 YAML 列表
+- 高级字段：用于精细控制模型、执行环境和触发范围，详见 [Frontmatter 完整字段参考](references/frontmatter-reference.md)
 
 
 #### 打包资源（可选）
