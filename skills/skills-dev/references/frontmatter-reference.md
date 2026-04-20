@@ -70,10 +70,10 @@ effort: high
 | `low` | 短小、延迟敏感、不需要推理的任务 |
 | `medium` | 对成本敏感、可接受少量推理损失的任务 |
 | `high` | 需要推理的任务的最低建议值 |
-| `xhigh` | 大多数编码和 agentic 任务的最佳选择（仅 Opus 4.7 支持） |
+| `xhigh` | 大多数编码和 agentic 任务的最佳选择 |
 | `max` | 当前会话生效，不跨会话持久化 |
 
-具体可用级别取决于所用模型：Opus 4.7 支持全部五档，Opus 4.6 / Sonnet 4.6 支持 `low`/`medium`/`high`/`max`（无 `xhigh`）。
+具体可用级别取决于所用模型，如：Opus 4.7 支持全部五档，Opus 4.6 / Sonnet 4.6 支持 `low`/`medium`/`high`/`max`（无 `xhigh`）。
 
 ## `hooks`
 
