@@ -229,9 +229,11 @@ cloud-deploy/
 ## 更新现有 Skill
 
 1. 读取 SKILL.md 和关联的**全部**打包资源，全面理解当前结构和用途
-2. 确认要改动的位置：description / body / scripts / references / assets
-3. 编辑对应文件（参见下方「编辑指南」）
-4. 如果改动了脚本，实际运行验证无 bug
+2. 运行 `scripts/quick_validate.py <path/to/skill-folder>` 了解当前格式问题，**再做判断**
+3. 确认要改动的位置：description / body / scripts / references / assets
+4. 编辑对应文件（参见下方「编辑指南」）
+5. 如果改动了脚本，实际运行验证无 bug
+6. 再次运行 `scripts/quick_validate.py <path/to/skill-folder>` 确认改动后无新问题
 
 ## 编辑指南
 
