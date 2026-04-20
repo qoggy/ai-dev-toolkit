@@ -4,14 +4,6 @@ description: 将文档翻译为中文
 disable-model-invocation: true
 ---
 
-## User Input
-
-```text
-$ARGUMENTS
-```
-
-你**必须**在处理之前先查看用户输入（如果非空）。
-
 ## Core Task
 
 将指定的文件翻译为中文，并写入同目录下以 `-cn.md` 结尾的文件中。

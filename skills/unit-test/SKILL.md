@@ -4,14 +4,6 @@ description: 编写单元测试
 argument-hint: <测试目标>
 ---
 
-## User Input
-
-```text
-$ARGUMENTS
-```
-
-你**必须**在处理之前先查看用户输入（如果非空）。
-
 ## Core Task
 
 你任务是编写单元测试，

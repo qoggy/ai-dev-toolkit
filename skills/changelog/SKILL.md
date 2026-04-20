@@ -4,14 +4,6 @@ description: 当用户要写 changelog、更新版本日志、整理版本变更
 argument-hint: [额外要求]
 ---
 
-## User Input
-
-```text
-$ARGUMENTS
-```
-
-你**必须**在处理之前先查看用户输入（如果非空）。
-
 ## Core Task
 
 你是一位资深的专业的软件开发者。你的任务是基于代码变更或项目需求，创建或更新符合 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 标准的 CHANGELOG.md 文件。

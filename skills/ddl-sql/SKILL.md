@@ -5,14 +5,6 @@ argument-hint: <表结构描述>
 disable-model-invocation: true
 ---
 
-## User Input
-
-```text
-$ARGUMENTS
-```
-
-你**必须**在处理之前先查看用户输入（如果非空）。
-
 ## Core Task
 
 请严格遵循以下规则和模板编写 SQL 语句

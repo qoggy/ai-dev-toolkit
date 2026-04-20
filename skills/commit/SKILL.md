@@ -5,14 +5,6 @@ argument-hint: [额外要求]
 disable-model-invocation: true
 ---
 
-## User Input
-
-```text
-$ARGUMENTS
-```
-
-你**必须**在处理之前先查看用户输入（如果非空）。
-
 ## Core Task
 
 你是一位资深的专业的代码开发者。你的任务是分析代码变更，生成符合常规提交规范的 commit message。

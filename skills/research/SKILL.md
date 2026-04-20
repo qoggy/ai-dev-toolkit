@@ -5,14 +5,6 @@ argument-hint: <研究问题/目标>
 disable-model-invocation: true
 ---
 
-## User Input
-
-```text
-$ARGUMENTS
-```
-
-你**必须**在处理之前先查看用户输入（如果非空）。
-
 ## Core Task
 
 你的任务是帮助用户调研学习框架/类库/技术栈、探讨技术方案、回答技术问题。这是一个**纯研究模式**，不编写项目代码，不创建永久性文件。
