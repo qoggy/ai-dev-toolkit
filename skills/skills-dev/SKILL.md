@@ -91,6 +91,7 @@ skill-name/
     - 同时包含 skill 的功能说明和具体的触发条件/使用场景。
     - 所有"何时使用"的信息都放在这里——不要放在 body 中。body 只有在触发后才会加载，因此 body 中的"何时使用本 Skill"章节对 AI 没有帮助。
     - description 在 skill 列表中会被截断，关键用例应前置。
+    - **正面描述触发场景**，讲"什么情况下用"，而非"什么情况下不用"。触发靠正面匹配，堆砌反面排除项既占篇幅又易误伤；确有必要划清边界时才补一句。
     - 示例 description："支持修订追踪、注释、格式保留和文本提取的全面文档创建、编辑和分析工具。处理专业 Word 文档（.docx 文件）时使用：(1) 创建新文档，(2) 修改或编辑内容，(3) 使用修订追踪，(4) 添加注释，或任何其他文档任务"
 
 > **可选字段与跨工具差异**：`argument-hint`、`disable-model-invocation`、`allowed-tools`、`user-invocable` 等可选字段，以及各工具的私有字段，都整理在 [references/frontmatter-reference.md](references/frontmatter-reference.md)。跨工具兼容时务必注意：不同工具能识别的字段不同（例如 **Codex 不识别 `disable-model-invocation` 这类 Claude 专有字段，而是通过 skill 内独立的 yaml 文件如 `agents/openai.yaml` 指定特殊参数**）。需要用到 `name`/`description` 以外的任何字段前，先查该参考文件确认目标工具是否支持。
@@ -233,6 +234,7 @@ cloud-deploy/
 
 - **避免深层嵌套引用** - 保持引用为从 SKILL.md 的一层深度。所有 reference 文件都应直接从 SKILL.md 链接。
 - **不加冗余导航** - reference 会被整篇读入 context，不要放与正文标题重复的目录 / 速查表 / 摘要——它们只是浪费 token。结构用清晰的标题层级和合理顺序表达。仅当文件极大（>10k 词）、预期靠 grep 定位而非整篇加载时，才在顶部附 grep 检索模式（或目录）。
+- **用 Markdown 链接引用文件** - skill 内文件互相引用时，用相对路径的 Markdown 链接（如 `[修订追踪细节](references/REDLINING.md)`、`[校验脚本](scripts/quick_validate.py)`），不要只写文件名（"见 REDLINING.md"）。链接让 AI 能直接定位并打开目标文件。
 - **始终使用正斜杠路径** - 文件路径一律用 `scripts/helper.py`，不要用 `scripts\helper.py`（反斜杠在 Unix 系统上会报错）。
 
 ## 创建新 Skill
