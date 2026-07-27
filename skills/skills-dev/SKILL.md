@@ -36,17 +36,28 @@ context window 是公共资源。Skill 与 Claude 所需的一切共享 context 
 
 ### Skills 的位置
 
-存放位置决定作用范围，同名 skill 优先级：个人 > 项目。
+存放位置决定 skill 的作用范围（个人 / 项目）以及**哪些 AI 工具能发现它**。不同产品扫描的路径不同，**具体放哪，先根据用户需求决定**——确认用户用的是哪个工具、要个人级还是项目级，再落地。
 
-| 位置 | 路径 | 适用于 |
+| 工具 | 个人级（所有项目） | 项目级（仅当前项目） |
 | --- | --- | --- |
-| 个人 | `~/.claude/skills/<skill-name>/SKILL.md` | 所有项目 |
-| 项目 | `.claude/skills/<skill-name>/SKILL.md` | 仅此项目 |
-| 插件 | `<plugin>/skills/<skill-name>/SKILL.md` | 启用插件的位置 |
+| 通用约定（多数工具，含 Cursor、GitHub Copilot） | `~/.agents/skills/` | `.agents/skills/` |
+| Codex | `~/.agents/skills/`（官方推荐） | `.agents/skills/` |
+| Claude Code | `~/.claude/skills/` | `.claude/skills/` |
 
-插件 skills 使用 `plugin-name:skill-name` 命名空间，不与其他级别冲突。
+每个 skill 都是 `<location>/<skill-name>/SKILL.md` 的形式。要点：
 
-查找 skill 文件时，先在当前 workspace 的 `.claude/skills/` 下寻找，再去 `~/.claude/skills/`。
+- **`.agents/skills`（及 `~/.agents/skills`）是跨工具通用约定**，Codex、Cursor、GitHub Copilot 等都会扫描；Claude Code **不识别** `.agents/skills`，只认 `.claude/skills`。
+- **Codex 项目级逐层向上扫描**：从当前工作目录 `$CWD/.agents/skills` 一路扫到 Git 仓库根 `$REPO_ROOT/.agents/skills`，沿途每层的 `.agents/skills` 都会被读取；此外还支持管理员级 `/etc/codex/skills` 与 Codex 内置 skill。Codex 个人级也能识别 `~/.codex/skills`，但官方已不推荐，优先用 `~/.agents/skills`。Codex 的专有配置（`agents/openai.yaml`、禁用 skill 等）见 [frontmatter 完整字段参考](references/frontmatter-reference.md)。
+- **一份文件、多工具复用**：常见做法是把 skill 实际存放在 `.agents`，再把 `.claude` 建成指向 `.agents` 的软链接（symlink），这样 Claude Code 也能发现同一份 skill：
+
+  ```bash
+  # 项目内让 .claude 复用 .agents（.claude/skills 会解析到 .agents/skills）
+  ln -s .agents .claude
+  ```
+
+- 同名 skill 的个人级 / 项目级优先级各工具不一，以对应工具文档为准。
+
+查找 skill 文件时，先在当前 workspace 的项目级路径下寻找，再去个人级路径。
 
 ### Skill 的结构
 
@@ -72,25 +83,17 @@ skill-name/
 
 ##### frontmatter
 
-编写包含 `name` 和 `description` 的 YAML frontmatter：
+**只有 `name` 和 `description` 是所有 AI 工具都通用支持的字段，SKILL.md 里必须写这两个。** 其余可选字段各工具支持程度不一，按需添加，完整清单见 [frontmatter 完整字段参考](references/frontmatter-reference.md)。
 
-- `name`：skill 名称（小写字母、数字、连字符，最多 64 字符）
-- `description`：这是 skill 的主要触发机制，帮助 Claude 理解何时使用该 skill。
+- `name`：skill 名称（小写字母、数字、连字符，最多 64 字符），需与目录名一致
+- `description`：这是 skill 的主要触发机制，帮助 AI 理解何时使用该 skill。
     - **使用第三人称**描述 skill 的功能和触发场景（description 会注入到 system prompt，视角混乱会导致发现问题）。避免使用"I can..."或"You can use this to..."。
     - 同时包含 skill 的功能说明和具体的触发条件/使用场景。
-    - 所有"何时使用"的信息都放在这里——不要放在 body 中。body 只有在触发后才会加载，因此 body 中的"何时使用本 Skill"章节对 Claude 没有帮助。
+    - 所有"何时使用"的信息都放在这里——不要放在 body 中。body 只有在触发后才会加载，因此 body 中的"何时使用本 Skill"章节对 AI 没有帮助。
     - description 在 skill 列表中会被截断，关键用例应前置。
-    - `docx` skill 的示例 description："支持修订追踪、注释、格式保留和文本提取的全面文档创建、编辑和分析工具。处理专业 Word 文档（.docx 文件）时使用：(1) 创建新文档，(2) 修改或编辑内容，(3) 使用修订追踪，(4) 添加注释，或任何其他文档任务"
+    - 示例 description："支持修订追踪、注释、格式保留和文本提取的全面文档创建、编辑和分析工具。处理专业 Word 文档（.docx 文件）时使用：(1) 创建新文档，(2) 修改或编辑内容，(3) 使用修订追踪，(4) 添加注释，或任何其他文档任务"
 
-可选 frontmatter 字段：
-
-- `argument-hint`：自动补全时显示的参数提示，如 `<issue-number>` 或 `[filename] [format]`
-- `disable-model-invocation: true`：禁止 Claude 自动触发此 skill（描述也不会注入 context），适合只想用 `/name` 手动调用的工作流
-- `user-invocable: false`：从 `/` 菜单中隐藏，适合背景知识类 skill（Claude 自动加载，用户不直接调用）
-- `context: fork`：在 subagent 的分叉 context 中运行，适合需要独立执行的任务
-- `agent`：配合 `context: fork` 指定使用的 subagent 类型
-- `allowed-tools`：此 skill 激活时 Claude 无需额外确认即可使用的工具，空格分隔或 YAML 列表
-- 高级字段：用于精细控制模型、执行环境和触发范围，详见 [frontmatter 完整字段参考](references/frontmatter-reference.md)
+> **可选字段与跨工具差异**：`argument-hint`、`disable-model-invocation`、`allowed-tools`、`user-invocable` 等可选字段，以及各工具的私有字段，都整理在 [references/frontmatter-reference.md](references/frontmatter-reference.md)。跨工具兼容时务必注意：不同工具能识别的字段不同（例如 **Codex 不识别 `disable-model-invocation` 这类 Claude 专有字段，而是通过 skill 内独立的 yaml 文件如 `agents/openai.yaml` 指定特殊参数**）。需要用到 `name`/`description` 以外的任何字段前，先查该参考文件确认目标工具是否支持。
 
 
 #### 打包资源（可选）
@@ -229,12 +232,53 @@ cloud-deploy/
 **重要指南：**
 
 - **避免深层嵌套引用** - 保持引用为从 SKILL.md 的一层深度。所有 reference 文件都应直接从 SKILL.md 链接。
-- **为较长的 reference 文件设置结构** - 对于超过 100 行的文件，在顶部包含目录，以便 Claude 在预览时能看到完整范围。
+- **不加冗余导航** - reference 会被整篇读入 context，不要放与正文标题重复的目录 / 速查表 / 摘要——它们只是浪费 token。结构用清晰的标题层级和合理顺序表达。仅当文件极大（>10k 词）、预期靠 grep 定位而非整篇加载时，才在顶部附 grep 检索模式（或目录）。
 - **始终使用正斜杠路径** - 文件路径一律用 `scripts/helper.py`，不要用 `scripts\helper.py`（反斜杠在 Unix 系统上会报错）。
 
 ## 创建新 Skill
 
-从头创建时，先参见 [references/create-new.md](references/create-new.md) 完成步骤 1-3（理解、规划、初始化），然后回到下方「编辑指南」。
+从头创建时，先完成下面的步骤 1-3，再进入「编辑指南」继续。
+
+### 第 1 步：通过具体示例理解 Skill
+
+只有在 skill 的使用模式已经清晰理解时才跳过此步骤。
+
+要创建有效的 skill，需要清楚地理解它将被如何使用的具体示例。这种理解可以来自用户直接提供的示例，或通过生成示例再经用户反馈验证。
+
+例如，在构建 image-editor skill 时，相关问题包括：
+
+- "image-editor skill 应支持哪些功能？编辑、旋转，还是其他？"
+- "你能举一些这个 skill 会被如何使用的例子吗？"
+- "用户会说什么来触发这个 skill？"
+
+避免在一条消息中提问太多问题。从最重要的问题开始，根据需要跟进。
+
+### 第 2 步：规划可复用的 Skill 内容
+
+分析每个具体示例，识别哪些 `scripts/`、`references/`、`assets/` 会有帮助（各类型的判断标准见上方「打包资源（可选）」）。整理出要包含的可复用资源清单，作为下一步实现的基础。
+
+### 第 3 步：初始化 Skill 目录
+
+先与用户确认存放位置（见上方「Skills 的位置」，确认工具与个人级/项目级），再手动创建目录：
+
+```bash
+mkdir -p <location>/<skill-name>
+```
+
+在 `<skill-name>/SKILL.md` 写入最小 frontmatter 骨架：
+
+```markdown
+---
+name: <skill-name>
+description: <第三人称说明功能 + 何时触发>
+---
+
+# <Skill 标题>
+
+<正文待补充>
+```
+
+只在第 2 步确认确有需要时，才创建 `scripts/`、`references/`、`assets/` 子目录——不要预先创建空目录。完成后进入下方「编辑指南」。
 
 ## 更新现有 Skill
 
@@ -272,9 +316,20 @@ Bad Example："你应该先读取配置文件。你需要验证输入。"
 Good Example："先读取配置文件。验证输入后再处理。"
 ```
 
+**信息密度（MUST）：** 每句话都要携带 AI 尚不知道的信息。删掉过渡性废话（"以下为…""值得注意的是…""本节将介绍…"）和与正文标题重复的目录、速查表、摘要——SKILL.md 与被读取的 reference 都会整篇进入 context，重复索引只是浪费 token。逻辑结构靠清晰的标题层级和合理的编排顺序表达，而非额外的导航件。宁可一句话讲透，不要三句话铺垫。
+
 **保持精简：** body 控制在 500 行以内。但不要为了控制行数而强行拆分——只有当内容具备分支性、低频性或可选性时，才将细节移入 references/，并在 SKILL.md 中明确引用及说明何时读取。
 
 **引用打包资源：** 在 SKILL.md 中列出所有 references/、scripts/、assets/ 文件及其用途，Claude 实例才知道它们存在。
+
+### 多轮修改保持全文一致（MUST）
+
+用户常与你多轮对焦，你会据此多次修改 skill。每次改动都以**整个 skill（SKILL.md + scripts/ + references/ + assets/）**为单位检查，禁止只改一处、留下别处引用旧内容：
+
+- **改文件结构**：删除或重命名某个 script / reference / asset 后，SKILL.md 及其他文件中所有引用它的路径与说明一并更新或删除
+- **改 frontmatter**：调整 `name` / `description` / 可选字段后，正文及各 reference 里与之相关的触发说明、调用方式同步修正
+- **改工作流程 / 步骤**：调整某个步骤或做法后，所有描述它的章节（含 references 里的细节）同步修正，不允许一处已改、另一处仍写老做法
+- 改完**通读整个 skill 一遍**，确认没有自相矛盾、没有指向已删除文件的悬空引用
 
 ## 打包 Skill
 
