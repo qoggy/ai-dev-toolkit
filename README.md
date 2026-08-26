@@ -14,4 +14,4 @@ AI development toolkit featuring prompts, rules, and configurations for Claude C
 | [translate](skills/translate/SKILL.md) | 将文档翻译为中文 |
 | [humanize](skills/humanize/SKILL.md) | 去除文本中的 AI 生成痕迹，使文字更自然 |
 | [research](skills/research/SKILL.md) | 调研框架/类库/技术方案，探讨技术选型 |
-| [skills-dev](skills/skills-dev/SKILL.md) | 创建或更新 skill 的指导手册 |
+| [skill-dev](skills/skill-dev/SKILL.md) | 创建或更新 skill 的指导手册 |
