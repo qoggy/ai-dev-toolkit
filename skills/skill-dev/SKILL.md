@@ -11,16 +11,16 @@ disable-model-invocation: true
 
 ## 关于 Skill
 
-Skill 是模块化、自包含的软件包，通过提供专业知识、工作流程和工具，来扩展 Claude 的能力。
-可以将其理解为特定领域或任务的"上手指南"——它们将通用型 Claude 转变为配备程序性知识的专业化 agent，而这类知识是任何模型都无法完全掌握的。
+Skill 是模块化、自包含的软件包，通过提供专业知识、工作流程和工具，来扩展 Agent 的能力。
+可以将其理解为特定领域或任务的"上手指南"——它们将通用型 Agent 转变为配备程序性知识的专业化 agent，而这类知识是任何模型都无法完全掌握的。
 
 ## 核心原则
 
 ### 简洁为王
 
-context window 是公共资源。Skill 与 Claude 所需的一切共享 context window：系统提示、对话历史、其他 skill 的元数据，以及实际的用户请求。
+context window 是公共资源。Skill 与 Agent 所需的一切共享 context window：系统提示、对话历史、其他 skill 的元数据，以及实际的用户请求。
 
-**默认假设：Claude 本身已经非常聪明。** 只添加 Claude 还没有的上下文。质疑每一条信息："Claude 真的需要这段解释吗？"以及"这个段落值得消耗这些 token 吗？"
+**默认假设：Agent 本身已经非常聪明。** 只添加 Agent 还没有的上下文。质疑每一条信息："Agent 真的需要这段解释吗？"以及"这个段落值得消耗这些 token 吗？"
 
 优先用简洁的示例代替冗长的解释。
 
@@ -78,7 +78,7 @@ skill-name/
 
 每个 SKILL.md 包含：
 
-- **Frontmatter**（YAML）：包含 `name` 和 `description` 字段。这是 Claude 判断何时触发该 skill 的唯一依据，因此清晰、全面地描述 skill 的功能及使用时机至关重要。
+- **Frontmatter**（YAML）：包含 `name` 和 `description` 字段。这是 Agent 判断何时触发该 skill 的唯一依据，因此清晰、全面地描述 skill 的功能及使用时机至关重要。
 - **Body**（Markdown）：使用 skill 的说明和指导。只有在 skill 触发后才会加载。
 
 ##### frontmatter
@@ -106,27 +106,27 @@ skill-name/
 - **何时包含**：当相同代码被反复重写，或需要确定性可靠性时
 - **示例**：`scripts/rotate_pdf.py` 用于 PDF 旋转任务
 - **优点**：token 高效、结果确定，可在不加载到 context 的情况下执行
-- **注意**：脚本仍可能需要被 Claude 读取，以进行修补或环境特定的调整
+- **注意**：脚本仍可能需要被 Agent 读取，以进行修补或环境特定的调整
 
 ##### References（`references/`）
 
-文档和参考资料，按需加载到 context 中，为 Claude 的处理和思考提供参考。
+文档和参考资料，按需加载到 context 中，为 Agent 的处理和思考提供参考。
 
-- **何时包含**：用于 Claude 在工作时应参考的文档
+- **何时包含**：用于 Agent 在工作时应参考的文档
 - **示例**：`references/finance.md` 用于财务 schema，`references/mnda.md` 用于公司 NDA 模板，`references/policies.md` 用于公司政策，`references/api_docs.md` 用于 API 规范
 - **使用场景**：数据库 schema、API 文档、领域知识、公司政策、详细的工作流程指南
-- **优点**：保持 SKILL.md 精简，只在 Claude 判断需要时才加载
+- **优点**：保持 SKILL.md 精简，只在 Agent 判断需要时才加载
 - **最佳实践**：如果文件较大（>10k 词），在 SKILL.md 中包含 grep 搜索模式
 - **避免重复**：信息应存放在 SKILL.md 或 references 文件中，不要两者都有。对于详细信息，优先使用 references 文件，除非该信息是 skill 的核心内容——这样既能保持 SKILL.md 精简，又能让信息可被发现，而不会占用 context window。SKILL.md 只保留基本的程序性说明和工作流程指导；将详细的参考资料、schema 和示例移至 references 文件。
 
 ##### Assets（`assets/`）
 
-不打算加载到 context 中，而是在 Claude 生成的输出中使用的文件。
+不打算加载到 context 中，而是在 Agent 生成的输出中使用的文件。
 
 - **何时包含**：当 skill 需要将在最终输出中使用的文件时
 - **示例**：`assets/logo.png` 用于品牌资产，`assets/slides.pptx` 用于 PowerPoint 模板，`assets/frontend-template/` 用于 HTML/React 样板代码，`assets/font.ttf` 用于字体
 - **使用场景**：模板、图片、图标、样板代码、字体、会被复制或修改的示例文档
-- **优点**：将输出资源与文档分离，使 Claude 无需将文件加载到 context 即可使用
+- **优点**：将输出资源与文档分离，使 Agent 无需将文件加载到 context 即可使用
 
 #### Skill 中不应包含什么
 
@@ -146,7 +146,7 @@ Skill 使用三级加载系统来有效管理 context：
 
 1. **元数据（name + description）** - 始终在 context 中（约 100 词）
 2. **SKILL.md body** - 当 skill 触发时（<5k 词）
-3. **打包资源** - 由 Claude 按需加载（无限制，因为脚本可以在不读取到 context window 的情况下执行）
+3. **打包资源** - 由 Agent 按需加载（无限制，因为脚本可以在不读取到 context window 的情况下执行）
 
 #### 渐进式披露模式
 
@@ -178,7 +178,7 @@ Skill 使用三级加载系统来有效管理 context：
 - **示例**：常见模式见 [EXAMPLES.md](EXAMPLES.md)
 ```
 
-只有在需要时，Claude 才会加载 FORMS.md、REFERENCE.md 或 EXAMPLES.md。
+只有在需要时，Agent 才会加载 FORMS.md、REFERENCE.md 或 EXAMPLES.md。
 
 **模式 2：按领域组织**
 
@@ -194,7 +194,7 @@ bigquery-skill/
     └── marketing.md（营销活动、归因）
 ```
 
-当用户询问销售指标时，Claude 只读取 sales.md。
+当用户询问销售指标时，Agent 只读取 sales.md。
 
 类似地，对于支持多个框架或变体的 skill，按变体组织：
 
@@ -207,7 +207,7 @@ cloud-deploy/
     └── azure.md（Azure 部署模式）
 ```
 
-当用户选择 AWS 时，Claude 只读取 aws.md。
+当用户选择 AWS 时，Agent 只读取 aws.md。
 
 **模式 3：条件性细节**
 
@@ -228,7 +228,7 @@ cloud-deploy/
 **对于 OOXML 细节**：参见 [OOXML.md](OOXML.md)
 ```
 
-只有当用户需要这些功能时，Claude 才会读取 REDLINING.md 或 OOXML.md。
+只有当用户需要这些功能时，Agent 才会读取 REDLINING.md 或 OOXML.md。
 
 **重要指南：**
 
@@ -294,14 +294,15 @@ description: <第三人称说明功能 + 何时触发>
 
 ## 编辑指南
 
-编辑（新生成的或现有的）skill 时，请记住 skill 是为另一个 Claude 实例创建的。包含对 Claude 有益且非显而易见的信息。考虑哪些程序性知识、领域特定细节或可复用资产能帮助另一个 Claude 实例更有效地执行这些任务。
+编辑（新生成的或现有的）skill 时，请记住 skill 是为另一个 Agent 实例创建的。包含对 Agent 有益且非显而易见的信息。考虑哪些程序性知识、领域特定细节或可复用资产能帮助另一个 Agent 实例更有效地执行这些任务。
 
 ### 学习经过验证的设计模式
 
 根据 skill 的需求参考以下最佳实践指南：
 
 - **多步骤流程**：参见 [references/workflows.md](references/workflows.md)，了解顺序工作流程和条件逻辑
-- **特定输出格式或质量标准**：参见 [references/output-patterns.md](references/output-patterns.md)，了解模板和示例模式
+- **特定输出格式或质量标准**：参见 [references/output-patterns.md](references/output-patterns.md)，了解输出模板和输入/输出对
+- **需要写示例**：参见 [references/example-patterns.md](references/example-patterns.md)，了解三种推荐的示例格式及各自适用场景
 
 ### 从可复用的 Skill 内容开始
 
@@ -322,7 +323,7 @@ Good Example："先读取配置文件。验证输入后再处理。"
 
 **保持精简：** body 控制在 500 行以内。但不要为了控制行数而强行拆分——只有当内容具备分支性、低频性或可选性时，才将细节移入 references/，并在 SKILL.md 中明确引用及说明何时读取。
 
-**引用打包资源：** 在 SKILL.md 中列出所有 references/、scripts/、assets/ 文件及其用途，Claude 实例才知道它们存在。
+**引用打包资源：** 在 SKILL.md 中列出所有 references/、scripts/、assets/ 文件及其用途，Agent 实例才知道它们存在。
 
 ### 多轮修改保持全文一致（MUST）
 
