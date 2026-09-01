@@ -1,4 +1,0 @@
-policy:
-  # 对应 SKILL.md frontmatter 的 disable-model-invocation: true
-  # 禁止 Codex 自动触发；仍可用 $skill-dev 手动调用
-  allow_implicit_invocation: false
