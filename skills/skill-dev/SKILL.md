@@ -233,7 +233,7 @@ cloud-deploy/
 
 - **避免深层嵌套引用** - 保持引用为从 SKILL.md 的一层深度。所有 reference 文件都应直接从 SKILL.md 链接。
 - **不加冗余导航** - reference 会被整篇读入 context，不要放与正文标题重复的目录 / 速查表 / 摘要——它们只是浪费 token。结构用清晰的标题层级和合理顺序表达。仅当文件极大（>10k 词）、预期靠 grep 定位而非整篇加载时，才在顶部附 grep 检索模式（或目录）。
-- **用 Markdown 链接引用文件** - skill 内文件互相引用时，用相对路径的 Markdown 链接（如 `[修订追踪细节](references/REDLINING.md)`、`[校验脚本](scripts/quick_validate.py)`），不要只写文件名（"见 REDLINING.md"）。链接让 AI 能直接定位并打开目标文件。
+- **用 Markdown 链接引用文件** - skill 内文件互相引用时，用相对路径的 Markdown 链接（如 `[修订追踪细节](references/REDLINING.md)`、`[校验脚本](scripts/quick_validate.py)`），不要只写文件名（"见 REDLINING.md"）。链接让 AI 能直接定位并打开目标文件。本地链接的目标建议位于当前 skill 目录内，不建议通过 `../` 引用目录外文件。
 - **始终使用正斜杠路径** - 文件路径一律用 `scripts/helper.py`，不要用 `scripts\helper.py`（反斜杠在 Unix 系统上会报错）。
 
 ## 创建新 Skill

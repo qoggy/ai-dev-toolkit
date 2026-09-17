@@ -107,3 +107,296 @@ disable-model-invocation: true
 ## 格式
 
 在对话里直接讲，不落盘、不建文件。一句结论开头，需要时跟几条要点行、一张合格的图，结尾是下一步。不要重建成带多级标题的文档。
+
+## 示例
+
+### 看不懂的表达
+
+<example>
+
+AI 检测的失败原因，来自独立评测 Agent 最终输出的 `reason`。
+
+例如 AI 检查代码、工具轨迹，并实际调用接口后输出：
+
+```json
+{
+  "status": "failed",
+  "reason": "代码创建了 RPC Client，但没有调用 ExampleOrderService；HTTP 接口返回 500。",
+  "evidence": [
+    {
+      "source": "sub_chat_message",
+      "recordId": "judge-message-008"
+    }
+  ],
+  "missingEvidence": []
+}
+```
+
+其中：
+
+- `reason`：为什么没通过。
+- `evidence`：支持这个判断的代码检查或工具调用记录。
+- `missingEvidence`：因为缺少什么证据而无法判断。
+
+AI 不能只说“失败”。它必须给出原因和证据。给不出原因、证据不存在或无法验证时，这一项记为“无法判断”，不能记为失败或通过。
+
+<reasoning>
+这段话没有说明检测 AI 怎样提交结果。
+这段话也没有说明平台怎样识别这份结果。
+`evidence`、`missingEvidence`、`source` 和 `recordId` 没有对应到现有系统中的真实字段。
+`judge-message-008` 是虚构 ID，却被写成可以查询的记录编号。
+读者因此不知道这些字段从哪来。
+读者也不知道应该到哪里核对评测结果。
+</reasoning>
+
+</example>
+
+<example>
+
+**都下发到当前 Case 的沙箱里执行，不在 DevPortal 服务器上执行，也不让 Agent 帮忙执行。** 下面说的是 design 中的方案，尚未实现。
+
+以这个检测项为例：
+
+```yaml
+- id: has-generation-command
+  type: command
+  command: node checks/has-gen-rpc.mjs
+```
+
+整个过程是：
+
+**1. DevPortal 把 Owner 的 Case 目录复制到沙箱。**
+
+包括 `case.yaml`、`checks/has-gen-rpc.mjs`，以及 Case 目录里的其他文件。目录结构保持不变。
+
+这个目录通过 `EVAL_CASE_DIRECTORY` 告诉脚本。它与被测产品的代码目录分开，避免 Agent 修改检测脚本。**具体绝对路径，当前文档还没有写明。**
+
+**2. DevPortal 把 command 原文写成一个临时文件。**
+
+这个例子会生成：
+
+```text
+/tmp/skill-evaluation/commands/has-generation-command.sh
+```
+
+文件内容只有：
+
+```bash
+node checks/has-gen-rpc.mjs
+```
+
+注意：`.mjs` 是 Owner 写的真正检测脚本；`.sh` 是 DevPortal 自动生成的文件，用来执行 Owner 填写的 command。
+
+**3. DevPortal 通过 Sandbox SDK，让沙箱执行它。**
+
+当前设计使用一个统一的启动文件：
+
+```bash
+bash /tmp/skill-evaluation/run-command-wrapper.sh
+```
+
+它负责设置目录变量、切换到 Case 目录，然后执行上面的命令文件。相当于：
+
+```bash
+cd "$EVAL_CASE_DIRECTORY"
+node checks/has-gen-rpc.mjs
+```
+
+检测脚本需要读取被测代码时，用 `EVAL_CODE_DIRECTORY`；读取 `.project-docs` 时，用 `EVAL_DOCS_DIRECTORY`，不用猜目录在哪里。
+
+**4. 沙箱把执行结果返回 DevPortal。**
+
+DevPortal 根据退出码判断是否通过，并按已定规则保存失败输出。
+
+启动、检测、清理三类 command 都采用这套执行方式，只是执行时机不同。**R4 要调整的仅是第 2 步的临时文件命名，其他链路不变。**
+
+<reasoning>
+读者在第 1 步就卡住了，因为“Owner 的 Case 目录”不是此前已经说明过的真实目录。回答没有先说这些文件原本位于哪里、DevPortal 怎样读取它们、又怎样写进沙箱。
+“复制”掩盖了完整链路。读者无法判断这是 Git clone、调用 Git 托管平台接口、从 DevPortal 本机复制，还是通过 Sandbox SDK 写文件。
+`EVAL_CASE_DIRECTORY` 是回答临时引入的名字，但没有先说谁设置它、什么时候设置、值是什么。后面的步骤继续使用这个未知变量，只会把疑问带到每一步。
+回答一边承认“具体绝对路径还没有写明”，一边继续给出 command 临时文件和 wrapper 的绝对路径，混在一起讲了已查实的现有能力、设计中已确定的内容和临时设想。
+后面三步都依赖第 1 步。第 1 步没有讲清文件来源、传输方式和落点，继续解释 `.mjs`、`.sh` 和退出码只会增加新名词。
+正确顺序应是：Case 文件现在存在哪里 → DevPortal 通过什么已有能力读取 → DevPortal 通过什么已有能力写到沙箱的哪个目录 → 谁设置 `EVAL_CASE_DIRECTORY`。尚未确定的环节应直接标成设计缺口，不能用未经确认的路径代替答案。
+</reasoning>
+
+</example>
+
+<example>
+
+### 删除运行期间对 Case 文件的重复检查
+
+**现在：**准备时检查 Case 目录、`case.yaml` 是否存在；之后查询 Skill 是否准备好，还会再检查它们。
+
+**建议：**只在准备时检查一次。查询 Skill 是否可用，不再检查 Case 文件。
+
+**影响：**如果有人在准备成功后手动删除 Case 文件，不会提前发现；执行到需要这个文件的操作时才报错。正常流程不受影响。
+
+<reasoning>
+“准备时”没有说明谁在准备什么，也没有说明发生在下载仓库之后、Agent 开始运行之前。读者无法把这句话放进实际流程。
+“Case 目录”没有给出位置。以假设的 `rpc/first-integration` 用例为例，先写清它来自 `skill-marketplace/skill-evals/cases/rpc/first-integration/`，再说明 sandbox-ide 下载后会把它复制到沙箱的 `~/.project-docs/skill-evaluation/cases/rpc/first-integration/`，才能区分检查的是下载内容还是复制后的文件。
+“检查”没有说明判定标准。这里实际只确认目录存在且是目录、`case.yaml` 存在且是普通文件；不是读取 YAML 内容，更不是判断测试用例写得对不对。
+“查询 Skill 是否准备好”把代码里的判断包装成了读者没见过的操作。实际场景是 sandbox-ide 读取可用 Skill、插件列表时，调用同步函数，并在评测沙箱里顺带检查本地 Case 文件。
+“还会再检查它们”省略了执行者、时机和对象。分别讲清第一次是下载仓库后检查用例目录及 `case.yaml`，第二次是后来读取 Skill、插件列表时检查沙箱中复制好的目录及 `case.yaml`，再指出建议只删除第二次检查。
+可改写为：“sandbox-ide 下载仓库后，先确认所选 Case 的目录和 `case.yaml` 存在。这时 Agent 尚未开始运行。之后，sandbox-ide 读取可用 Skill 列表时，又会检查已经复制到沙箱里的 Case 目录和 `case.yaml`。建议保留下载后的检查，删除读取 Skill 列表时附带的检查。”
+这个写法明确区分了两次检查的发生时机、检查对象，以及要删除哪一次，不需要读者看过此前对话。
+</reasoning>
+
+</example>
+
+<example>
+
+用户：“数据库清理是不是给日常库和生产库分别发送 SQL？给我个基础示例，假设有一个表和一条数据。”
+
+AI：“会分别清理两个库。先通过 4 次查询获取库里的对象，发现只有 users 表，然后执行：”
+
+```sql
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE `对应库名`.`users`;
+SET FOREIGN_KEY_CHECKS = 1;
+```
+
+用户：“不对啊，你只发了一个 SQL，你是不是骗我？”
+
+AI：“一次接口调用可以携带多条 SQL。日常库实际是 5 次接口调用、7 条 SQL。”
+
+| 接口调用 | 执行内容 |
+| --- | --- |
+| 第 1 次 | 查询事件，结果为空 |
+| 第 2 次 | 查询触发器，结果为空 |
+| 第 3 次 | 查询存储过程、函数，结果为空 |
+| 第 4 次 | 查询表、视图，找到 users |
+| 第 5 次 | 同批执行上面的 3 条 SQL |
+
+用户：“第一次、第二次、第三次、第四次不执行 SQL？为什么不给我示例？”
+
+<reasoning>
+用户要的是具体执行示例，不是流程摘要。回答声称有 7 条 SQL，却只展示最后 3 条，用“查询事件”等文字替代另外 4 条，读者无法把数量与实际语句对上。
+第一次追问已经暴露示例缺失，第二次回答仍然只解释调用次数，没有补齐 SQL。问题不在于用户不知道“一次调用能带多条 SQL”，而在于回答省略了用户要看的内容。
+按调用顺序给出每次发送的实际 SQL，并紧跟该假设下的返回结果：前 3 次为空，第 4 次返回 users，第 5 次删除表。示例库名明确标为假设，不用“对应库名”让读者再做一次替换。
+区分接口调用次数、SQL 语句条数和代码块数量。若计数不含获取锁等辅助 SQL，先说明统计范围，不把部分语句称为全部执行过程。日常走接口、生产直连时，也分别说明，不能用一个库的调用次数代替两个库。
+精简解释不等于省略示例的关键步骤。用户要求命令、SQL 或请求参数时，直接展示具体内容，不让用户连续追问才补齐。本例记录的是表达问题，不要求其他系统采用这种数据库清理方式。
+</reasoning>
+
+</example>
+
+### 看得懂的表达
+
+<example>
+
+假设日常库叫 `eval_daily`，里面只有 `users` 表，存着一条“张三”的数据。完整清理如下。
+
+第 1 次调用，查询事件，返回空：
+
+```sql
+SELECT EVENT_NAME
+FROM information_schema.EVENTS
+WHERE EVENT_SCHEMA = 'eval_daily';
+```
+
+第 2 次调用，查询触发器，返回空：
+
+```sql
+SELECT TRIGGER_NAME
+FROM information_schema.TRIGGERS
+WHERE TRIGGER_SCHEMA = 'eval_daily';
+```
+
+第 3 次调用，查询存储过程和函数，返回空：
+
+```sql
+SELECT ROUTINE_NAME, ROUTINE_TYPE
+FROM information_schema.ROUTINES
+WHERE ROUTINE_SCHEMA = 'eval_daily';
+```
+
+第 4 次调用，查询表和视图：
+
+```sql
+SELECT TABLE_NAME, TABLE_TYPE
+FROM information_schema.TABLES
+WHERE TABLE_SCHEMA = 'eval_daily';
+```
+
+在这个假设下，MySQL 命令行的查询结果示例：
+
+```text
++------------+------------+
+| TABLE_NAME | TABLE_TYPE |
++------------+------------+
+| users      | BASE TABLE |
++------------+------------+
+1 row in set
+```
+
+这表示库里有一张普通表 `users`，没有视图。
+
+第 5 次调用，一批发送 3 条 SQL：
+
+```sql
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE `eval_daily`.`users`;
+SET FOREIGN_KEY_CHECKS = 1;
+```
+
+结果：`users` 表和里面的数据一起删除，`eval_daily` 数据库保留。
+
+总共 **5 次接口调用、7 条业务 SQL**。这里只是展示，不执行。
+
+这件事到这为止。
+
+<reasoning>
+用明确标为假设的库名、表名和一条数据交代初始状态，并在全部 SQL 中保持名称一致。
+按接口调用顺序展示具体 SQL。空结果直接说明为空；非空结果用明确标注的 MySQL 命令行输出示例展示字段名和值，让读者看到查询怎样得到待删除的表名。
+将最后 3 条 SQL 放在同一次调用下，明确接口调用次数与 SQL 语句条数的对应关系。
+结尾分别说明表、数据和数据库的最终状态，并明确示例不会实际执行。整个过程可以独立理解，不需要读者补充前文背景。
+</reasoning>
+
+</example>
+
+<example>
+
+**我建议：下载 Case 后确认文件存在；以后 sandbox-ide 读取 Skill 列表时，不再顺带检查 Case 文件。**
+
+举例，假设选中的 Case 是 `rpc/first-integration`，它在仓库里对应：
+
+```text
+skill-marketplace/skill-evals/cases/rpc/first-integration/case.yaml
+```
+
+现在代码会在两个时候检查它：
+
+**第一次：Agent 还没开始运行，sandbox-ide 刚下载完仓库。**
+
+sandbox-ide 检查：
+
+- 下载下来的 `skill-evals/cases/rpc/first-integration` 是不是一个实际目录。
+- 里面有没有 `case.yaml`，而且它是不是普通文件。
+
+**这里不读 YAML 内容，不检查用例写得对不对，只检查目录和文件是否存在、类型是否正确。**
+
+通过后，sandbox-ide 将整个 `skill-evals/` 复制到沙箱的 `~/.project-docs/skill-evaluation/`。我建议保留这次检查，避免文件没下载到就开始运行 Agent。
+
+**第二次：文件已经复制好了，sandbox-ide 后来读取可用的 Skill、插件列表。**
+
+这条读取链路会调用同步函数。在评测沙箱里，它不会重新下载，而是检查本地文件。它除了看 Skill 文件，还会顺带检查：
+
+```text
+~/.project-docs/skill-evaluation/cases/rpc/first-integration/
+~/.project-docs/skill-evaluation/cases/rpc/first-integration/case.yaml
+```
+
+检查内容仍然是：前者是不是目录，后者是不是普通文件。**我建议删除的就是这次对 Case 文件的检查。读取 Skill 列表，不需要再确认测试用例文件是否还在。**
+
+对应代码是 `sandbox-ide/src/skill-sync.ts:570`；下载后的检查在同文件第 618 行。
+
+**需要你决定**：删掉第二次检查，还是保留？我推荐删除；代价是有人中途删掉 Case 文件时，要等后续操作真正用到该文件才报错。尚未改代码。
+
+<reasoning>
+开头先给出保留哪次检查、删除哪次检查的建议，再用一个明确标为假设的 Case 说明具体过程。
+先交代文件在仓库中的位置，再交代复制到沙箱后的路径。两次检查各自写出执行者、发生时机和检查对象，不用“准备时”“它们”代替必要信息。
+明确“不读 YAML 内容”，让读者知道检查文件存在与校验用例内容不是一回事。解释第二次检查怎样出现在读取 Skill 列表的过程中，读者才有依据判断它是否多余。
+代码位置放在过程讲清之后，作为定位依据，而不是要求读者先看源码才能理解说明。这里使用脱敏后的示例路径和行号演示写法，实际重讲时应填写核实过的代码位置。
+结尾独立列出待决定事项，说明推荐方案的代价，并区分“建议修改”和“已经修改”。这个例子示范的是如何讲清取舍，不是要求其他任务一律删除重复检查。
+</reasoning>
+
+</example>
