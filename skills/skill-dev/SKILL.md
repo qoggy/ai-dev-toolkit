@@ -41,6 +41,58 @@ context window 是公共资源。Skill 与 Agent 所需的一切共享 context w
 运行 python scripts/find_record.py --id <记录编号> 查询记录；读取输出 JSON 的 status 和 record 字段判断结果。
 ```
 
+**把固定调用细节封装进配置或脚本（SHOULD）：** 将无需 Agent 决策的地址、请求头和固定选项收在配置或脚本中，只暴露调用入口和本次变化的参数。
+避免让执行者反复抄写整条命令，减少 Agent 抄写错误，提高执行稳定性。
+
+以向接口上报 JSON 文件为例：
+
+````markdown
+// Bad：每次都让执行者抄写接口地址和固定选项。
+
+将符合上述格式的结果 JSON 写入临时文件。将 <实际结果文件路径> 替换为该文件路径后提交：
+```bash
+curl --silent --show-error -X POST \
+  -H 'Content-Type: application/json' \
+  'https://api.example.com/api/reports' \
+  --data-binary '@<实际结果文件路径>' \
+  --write-out '\nHTTP_STATUS=%{http_code}\n'
+```
+HTTP_STATUS=200 且响应 JSON 中 success=true 表示提交成功，成功后结束任务；失败时根据错误修正后重新提交。
+````
+
+将固定选项放入 `scripts/submission.curl`：
+
+```text
+url = "https://api.example.com/api/reports"
+request = "POST"
+header = "Content-Type: application/json"
+silent
+show-error
+write-out = "\nHTTP_STATUS=%{http_code}\n"
+```
+
+在面向执行者的 SKILL.md 中，只给出调用方式：
+
+````markdown
+// Good：复用已有配置，只传入本次上报的数据文件路径。
+
+将符合上述格式的结果 JSON 写入临时文件。将 <实际结果文件路径> 替换为该文件路径后提交：
+```bash
+curl --config 'scripts/submission.curl' \
+  --data-binary '@<实际结果文件路径>'
+```
+HTTP_STATUS=200 且响应 JSON 中 success=true 表示提交成功，成功后结束任务；失败时根据错误修正后重新提交。
+````
+
+**保持 Skill 的封装独立（MUST）：** 将 Skill 视为一个 class，将 `scripts/` 中的脚本视为 private method。不要在一个 Skill 的脚本中直接调用或导入另一个 Skill 的内部脚本，避免依赖其可能变化的路径、参数和实现。
+
+需要其他 Skill 的能力时，按复用目的处理：
+
+- **组合任务流程**：在当前 SKILL.md 中指导 Agent 读取并按另一个 Skill 的说明执行，再使用其输出继续当前任务。
+- **复用代码能力**：在当前 Skill 内实现所需逻辑；确实需要共同维护的能力，抽取为独立工具或库，让各 Skill 依赖其公开接口。
+
+区分执行入口与公共接口：在 SKILL.md 中介绍 scripts/references/assets，只表示执行该 Skill 时可以使用，不代表其他 Skill 的脚本可以它们。
+
 ### 设定适当的自由度
 
 将具体程度与任务的脆弱性和可变性相匹配：
