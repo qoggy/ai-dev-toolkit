@@ -94,6 +94,19 @@ def validate_skill(skill_path):
         if len(description) > 1024:
             return False, f"description 过长（{len(description)} 个字符）。最多允许 1024 个字符。"
 
+    # 验证 compatibility（可选字段；提供时须为 1-500 字符的字符串）
+    if 'compatibility' in frontmatter:
+        compatibility = frontmatter['compatibility']
+        if compatibility is None:
+            return False, "compatibility 不能为空"
+        if not isinstance(compatibility, str):
+            return False, f"compatibility 必须是字符串，而非 {type(compatibility).__name__}"
+        compatibility = compatibility.strip()
+        if not compatibility:
+            return False, "compatibility 不能为空"
+        if len(compatibility) > 500:
+            return False, f"compatibility 过长（{len(compatibility)} 个字符）。最多允许 500 个字符。"
+
     return True, "Skill 验证通过！"
 
 

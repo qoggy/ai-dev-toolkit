@@ -2,6 +2,7 @@
 name: skill-dev
 description: 创建有效 skill 的指导手册。当用户想要创建新 skill（或更新现有 skill）以通过专业知识、工作流程或工具集成来扩展 AI 能力时，应使用本 skill。
 argument-hint: <描述你想要的 skill>
+compatibility: Requires Python 3 with PyYAML.
 ---
 
 # Skill Development
@@ -91,7 +92,7 @@ HTTP_STATUS=200 且响应 JSON 中 success=true 表示提交成功，成功后�
 - **组合任务流程**：在当前 SKILL.md 中指导 Agent 读取并按另一个 Skill 的说明执行，再使用其输出继续当前任务。
 - **复用代码能力**：在当前 Skill 内实现所需逻辑；确实需要共同维护的能力，抽取为独立工具或库，让各 Skill 依赖其公开接口。
 
-区分执行入口与公共接口：在 SKILL.md 中介绍 scripts/references/assets，只表示执行该 Skill 时可以使用，不代表其他 Skill 的脚本可以它们。
+区分执行入口与公共接口：在 SKILL.md 中介绍 scripts/references/assets，只表示执行该 Skill 时可以使用，不代表其他 Skill 的脚本可以使用它们。
 
 ### 设定适当的自由度
 
@@ -147,12 +148,12 @@ skill-name/
 
 每个 SKILL.md 包含：
 
-- **Frontmatter**（YAML）：包含 `name` 和 `description` 字段。这是 Agent 判断何时触发该 skill 的唯一依据，因此清晰、全面地描述 skill 的功能及使用时机至关重要。
+- **Frontmatter**（YAML）：包含 `name`、`description`，有环境依赖时加 `compatibility`。`name` + `description` 是 Agent 判断何时触发该 skill 的唯一依据，因此清晰、全面地描述 skill 的功能及使用时机至关重要。
 - **Body**（Markdown）：使用 skill 的说明和指导。只有在 skill 触发后才会加载。
 
 ##### frontmatter
 
-**只有 `name` 和 `description` 是所有 AI 工具都通用支持的字段，SKILL.md 里必须写这两个。** 其余可选字段各工具支持程度不一，按需添加，完整清单见 [frontmatter 完整字段参考](references/frontmatter-reference.md)。
+**只有 `name` 和 `description` 是所有 AI 工具都通用支持的字段，SKILL.md 里必须写这两个；skill 有环境依赖时再写 `compatibility`。** 其余可选字段各工具支持程度不一，按需添加，完整清单见 [frontmatter 完整字段参考](references/frontmatter-reference.md)。
 
 - `name`：skill 名称（小写字母、数字、连字符，最多 64 字符），需与目录名一致
 - `description`：这是 skill 的主要触发机制，帮助 AI 理解何时使用该 skill。
@@ -162,8 +163,15 @@ skill-name/
     - description 在 skill 列表中会被截断，关键用例应前置。
     - **正面描述触发场景**，讲"什么情况下用"，而非"什么情况下不用"。触发靠正面匹配，堆砌反面排除项既占篇幅又易误伤；确有必要划清边界时才补一句。
     - 示例 description："支持修订追踪、注释、格式保留和文本提取的全面文档创建、编辑和分析工具。处理专业 Word 文档（.docx 文件）时使用：(1) 创建新文档，(2) 修改或编辑内容，(3) 使用修订追踪，(4) 添加注释，或任何其他文档任务"
+- `compatibility`：agentskills.io 开放标准字段，声明 skill 运行所需的环境。读完 SKILL.md 与全部 scripts/ 后判断：**缺了某个环境条件 skill 就跑不起来或结果出错**时写，否则不写。
+    - **写**：脚本的运行时与第三方库；非通用的命令行工具（gh、docker、mvn 等）；网络访问、凭据、环境变量；依赖的 MCP server 或其他 skill；只有特定产品或系统才具备的能力（如仅 macOS 可用）。
+    - **不写**：纯文本指导，只用读写文件、grep、普通 shell 等 Agent 通用能力；git 等近乎普及、属于使用前提的工具；只带 `disable-model-invocation` 这类其他工具会忽略、不影响运行的专有字段；正文中仅作示例或可选步骤出现的命令。
+    - 1-500 字符，只列确实存在的依赖，不写"无额外依赖"之类的空话。
+    - 增删脚本、引入或去掉依赖后，同步增删或更新本字段。
+    - 默认使用英文编写此字段。
+    - 示例：`Requires Python 3.10+ with PyYAML and network access.`
 
-> **可选字段与跨工具差异**：`argument-hint`、`disable-model-invocation`、`allowed-tools`、`user-invocable` 等可选字段，以及各工具的私有字段，都整理在 [references/frontmatter-reference.md](references/frontmatter-reference.md)。跨工具兼容时务必注意：不同工具能识别的字段不同（例如 **Codex 不识别 `disable-model-invocation` 这类 Claude 专有字段，而是通过 skill 内独立的 yaml 文件如 `agents/openai.yaml` 指定特殊参数**）。需要用到 `name`/`description` 以外的任何字段前，先查该参考文件确认目标工具是否支持。
+> **其他可选字段与跨工具差异**：`argument-hint`、`disable-model-invocation`、`allowed-tools`、`user-invocable` 等可选字段，以及各工具的私有字段，都整理在 [references/frontmatter-reference.md](references/frontmatter-reference.md)。跨工具兼容时务必注意：不同工具能识别的字段不同（例如 **Codex 不识别 `disable-model-invocation` 这类 Claude 专有字段，而是通过 skill 内独立的 yaml 文件如 `agents/openai.yaml` 指定特殊参数**）。需要用到 `name`/`description`/`compatibility` 以外的任何字段前，先查该参考文件确认目标工具是否支持。
 
 
 #### 打包资源（可选）
@@ -355,7 +363,7 @@ description: <第三人称说明功能 + 何时触发>
 
 1. 读取 SKILL.md 和关联的**全部**打包资源，全面理解当前结构和用途
 2. 运行 `scripts/quick_validate.py <path/to/skill-folder>` 了解当前格式问题，**再做判断**
-3. 确认要改动的位置：description / body / scripts / references / assets
+3. 确认要改动的位置：description / compatibility / body / scripts / references / assets
 4. 如果无实质问题，则无需改动，并**详细**说明理由。不要为了"有所产出"而制造改动，更不要为了偷懒而放弃分析。
 5. 编辑对应文件（参见下方「编辑指南」）
 6. 如果改动了脚本，实际运行验证无 bug
