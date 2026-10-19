@@ -2,6 +2,7 @@
 name: skill-dev
 description: 创建有效 skill 的指导手册。当用户想要创建新 skill（或更新现有 skill）以通过专业知识、工作流程或工具集成来扩展 AI 能力时，应使用本 skill。
 argument-hint: <描述你想要的 skill>
+license: Apache-2.0
 compatibility: Requires Python 3 with PyYAML.
 ---
 
@@ -424,5 +425,6 @@ scripts/package_skill.py <path/to/skill-folder> ./dist
 官方 skill 规范与最佳实践文档，供深入了解时参阅。
 
 - https://code.claude.com/docs/zh-CN/skills
+- https://learn.chatgpt.com/docs/build-skills
 - https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
 - https://agentskills.io/skill-creation/best-practices
